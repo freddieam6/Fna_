@@ -1,22 +1,26 @@
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Only POST requests allowed' });
+  const ADMIN_EMAIL = "amoakofredrick65@gmail.com"; // your admin email
+  const userEmail = req.body.email || ""; // frontend sends this
+
+  // 🧠 Admin logic
+  if (userEmail === ADMIN_EMAIL) {
+    return res.status(200).json({
+      success: true,
+      message: "✅ Welcome, Admin! You have full and unlimited access.",
+      data: {
+        accessLevel: "admin",
+        features: "all",
+      },
+    });
   }
 
-  try {
-    const { script, character } = req.body;
-
-    // Example backend logic
-    // Later, we’ll connect this to an AI API (like OpenAI, ElevenLabs, or Replicate)
-    const aiResponse = {
-      character,
-      voice: `Generated voice for ${character}`,
-      text: `Processed script: ${script}`,
-    };
-
-    return res.status(200).json(aiResponse);
-  } catch (error) {
-    console.error('Error in API:', error);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
+  // 👤 Normal user logic
+  return res.status(200).json({
+    success: true,
+    message: "👋 Welcome, Free User! You have limited access.",
+    data: {
+      accessLevel: "free",
+      features: "basic",
+    },
+  });
 }
