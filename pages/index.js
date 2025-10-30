@@ -1,110 +1,101 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import axios from "axios";
 
 export default function Home() {
   const [character, setCharacter] = useState("");
   const [script, setScript] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [videoUrl, setVideoUrl] = useState("");
 
-  const generateContent = async () => {
+  const handleGenerate = async () => {
     if (!character || !script) {
-      alert("Please enter a character and script first!");
+      alert("Please enter both character name and script!");
       return;
     }
 
     setLoading(true);
-    setImageUrl("");
-    setVideoUrl("");
+    setResponse(null);
 
     try {
-      // Placeholder image generation
-      const img = `https://source.unsplash.com/800x600/?${character},futuristic`;
-      setImageUrl(img);
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ character, script }),
+      });
 
-      // Placeholder video (later replace with AI video API)
-      const vid = "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4";
-      setVideoUrl(vid);
+      const data = await res.json();
+      setResponse(data);
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong. Try again!");
+      console.error("Error:", error);
+      alert("Something went wrong!");
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 text-white flex flex-col items-center p-6">
-      <motion.h1
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-4xl font-extrabold mb-6 text-center bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent"
-      >
-        🎧 VoiceVerse Studio
-      </motion.h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-900 to-black text-white px-4">
+      <h1 className="text-3xl md:text-5xl font-bold mb-8 text-center">
+        🎙️ VoiceVerse Studio
+      </h1>
 
-      <div className="max-w-2xl w-full bg-gray-900/60 rounded-2xl shadow-xl p-6 border border-gray-700">
-        <label className="block text-lg mb-2 font-semibold">Character Name</label>
-        <input
-          type="text"
-          value={character}
-          onChange={(e) => setCharacter(e.target.value)}
-          className="w-full p-3 mb-4 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-green-400"
-          placeholder="e.g. Neo the Space Hacker"
-        />
+      <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-lg shadow-lg">
+        <label className="block mb-3">
+          <span className="text-gray-300 font-medium">Character Name</span>
+          <input
+            type="text"
+            value={character}
+            onChange={(e) => setCharacter(e.target.value)}
+            className="mt-1 w-full p-3 rounded-lg bg-gray-900 text-white border border-gray-700 focus:outline-none focus:border-blue-500"
+            placeholder="e.g. Neo the Space Hacker"
+          />
+        </label>
 
-        <label className="block text-lg mb-2 font-semibold">Script / Dialogue</label>
-        <textarea
-          rows="4"
-          value={script}
-          onChange={(e) => setScript(e.target.value)}
-          className="w-full p-3 mb-4 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-blue-400"
-          placeholder="Type your AI script here..."
-        ></textarea>
+        <label className="block mb-4">
+          <span className="text-gray-300 font-medium">Script / Dialogue</span>
+          <textarea
+            value={script}
+            onChange={(e) => setScript(e.target.value)}
+            className="mt-1 w-full p-3 rounded-lg bg-gray-900 text-white border border-gray-700 focus:outline-none focus:border-blue-500"
+            placeholder="Type your AI script here..."
+            rows={5}
+          />
+        </label>
 
         <button
-          onClick={generateContent}
+          onClick={handleGenerate}
           disabled={loading}
-          className="w-full py-3 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg font-bold text-lg hover:opacity-90 transition"
+          className="w-full py-3 bg-gradient-to-r from-blue-500 to-green-400 text-black font-bold rounded-lg hover:opacity-90 transition disabled:opacity-50"
         >
-          {loading ? "Generating..." : "Generate AI Image & Video"}
+          {loading ? "Generating..." : "Generate AI Image & Voice"}
         </button>
+
+        {response && (
+          <div className="mt-6 bg-gray-900 p-4 rounded-lg border border-gray-700">
+            <p className="text-green-400 font-semibold">✅ AI Response:</p>
+            <p className="text-sm text-gray-300 mt-2">
+              <strong>Character:</strong> {response.character}
+            </p>
+            <p className="text-sm text-gray-300">
+              <strong>Voice:</strong> {response.voice}
+            </p>
+            <p className="text-sm text-gray-300">
+              <strong>Text:</strong> {response.text}
+            </p>
+          </div>
+        )}
       </div>
 
-      {imageUrl && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-10"
+      <footer className="mt-10 text-gray-500 text-sm text-center">
+        Built with ❤️ by Frederick Amoako |{" "}
+        <a
+          href="http://bit.ly/4hzWx"
+          className="text-blue-400 hover:underline"
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          <h2 className="text-2xl font-bold mb-3">Generated Image</h2>
-          <img
-            src={imageUrl}
-            alt="Generated character"
-            className="rounded-2xl shadow-lg border border-gray-700"
-            width={400}
-          />
-        </motion.div>
-      )}
-
-      {videoUrl && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-10"
-        >
-          <h2 className="text-2xl font-bold mb-3">Generated Video</h2>
-          <video controls width="400" className="rounded-xl border border-gray-700">
-            <source src={videoUrl} type="video/mp4" />
-          </video>
-        </motion.div>
-      )}
-
-      <footer className="mt-16 text-gray-500 text-sm">
-        Built with ❤️ by Frederick Amoako | <a href="http://bit.ly/4hzWx" className="underline">Get Virtual Card</a>
+          Get Virtual Card
+        </a>
       </footer>
     </div>
   );
-            }
+              }
