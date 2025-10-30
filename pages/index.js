@@ -1,56 +1,69 @@
-<div className="grid grid-cols-1 gap-4 w-full max-w-md">
-  {accessData.tools.map((tool, index) => (
-    <button
-      key={index}
-      onClick={async () => {
-        if (tool.includes("Script")) {
-          const promptInput = prompt("Enter your script idea:");
-          if (!promptInput) return alert("Please enter something!");
-          const res = await fetch("/api/generateScript", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: promptInput }),
-          });
-          const data = await res.json();
-          alert(data.output);
-        } 
-        else if (tool.includes("Image")) {
-          const promptInput = prompt("Enter image idea:");
-          if (!promptInput) return alert("Please enter something!");
-          const res = await fetch("/api/generateImage", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: promptInput }),
-          });
-          const data = await res.json();
-          if (data.success) {
-            const img = document.createElement("img");
-            img.src = data.image;
-            img.alt = "Generated Image";
-            img.style.maxWidth = "100%";
-            document.body.appendChild(img);
-          } else {
-            alert(data.message);
-          }
-        } 
-        else if (tool.includes("Video")) {
-          const promptInput = prompt("Enter video idea:");
-          if (!promptInput) return alert("Please enter something!");
-          const res = await fetch("/api/generateVideo", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: promptInput }),
-          });
-          const data = await res.json();
-          alert(data.videoDescription);
-        } 
-        else {
-          alert(`⚙️ The "${tool}" feature is under development.`);
-        }
-      }}
-      className="bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700"
-    >
-      {tool}
-    </button>
-  ))}
-</div>
+import { useState } from "react";
+
+export default function Home() {
+  const [prompt, setPrompt] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) return alert("Please enter a prompt!");
+
+    setLoading(true);
+    setImageUrl("");
+
+    try {
+      const res = await fetch("/api/generateImage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+
+      const data = await res.json();
+      setImageUrl(data.imageUrl);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate image");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main style={{ padding: "2rem", textAlign: "center" }}>
+      <h1>🧠 AI Image Generator</h1>
+      <input
+        type="text"
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        placeholder="Enter your image prompt..."
+        style={{ width: "80%", padding: "0.5rem", marginTop: "1rem" }}
+      />
+      <br />
+      <button
+        onClick={handleGenerate}
+        disabled={loading}
+        style={{
+          marginTop: "1rem",
+          padding: "0.7rem 1.5rem",
+          background: "#0070f3",
+          color: "white",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+        }}
+      >
+        {loading ? "Generating..." : "Generate Image"}
+      </button>
+
+      {imageUrl && (
+        <div style={{ marginTop: "2rem" }}>
+          <img
+            src={imageUrl}
+            alt="Generated result"
+            style={{ maxWidth: "100%", borderRadius: "10px" }}
+          />
+        </div>
+      )}
+    </main>
+  );
+}
