@@ -23,15 +23,42 @@ export default function Home() {
         <p className="text-lg mb-6">{accessData.message}</p>
 
         <div className="grid grid-cols-1 gap-4 w-full max-w-md">
-          {accessData.tools.map((tool, index) => (
-            <button
-              key={index}
-              className="bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700"
-            >
-              {tool}
-            </button>
-          ))}
-        </div>
+  {accessData.tools.map((tool, index) => (
+    <button
+      key={index}
+      onClick={async () => {
+        // 🪄 Handle Generate Script
+        if (tool.includes("Script")) {
+          const promptInput = prompt("Enter your script idea:");
+          if (!promptInput) return alert("Please enter something!");
+          
+          const res = await fetch("/api/generateScript", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: promptInput }),
+          });
+          const data = await res.json();
+          alert(data.output);
+        } 
+        // 🎨 Handle Generate Image (placeholder for now)
+        else if (tool.includes("Image")) {
+          alert("🖼️ Image generation coming soon!");
+        } 
+        // 🎥 Handle Generate Video (placeholder for now)
+        else if (tool.includes("Video")) {
+          alert("🎬 Video generation coming soon!");
+        } 
+        // ⚙️ Other tools
+        else {
+          alert(`⚙️ The "${tool}" feature is under development.`);
+        }
+      }}
+      className="bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700"
+    >
+      {tool}
+    </button>
+  ))}
+</div>
 
         <button
           onClick={() => setAccessData(null)}
