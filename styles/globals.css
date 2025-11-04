@@ -3,7 +3,21 @@
 @tailwind utilities;
 
 body {
-  font-family: 'Poppins', sans-serif;
-  background-color: #0a0a0a;
+  background: radial-gradient(circle at top left, #000000, #1a1a1a);
   color: white;
+  font-family: 'Poppins', sans-serif;
+}
+
+button {
+  background: linear-gradient(90deg, #FFD700, #FFAA00);
+  color: black;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 16px;
+  transition: 0.3s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
 }
