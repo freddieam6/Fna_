@@ -1,24 +1,29 @@
-import { signIn } from "next-auth/react";
+import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 
-export default function SignIn() {
+export default function Home() {
+  const { data: session } = useSession();
+
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-background text-center">
-      <h1 className="text-3xl font-bold text-gold mb-8">Welcome to VoiceVerse Studio</h1>
-      <p className="text-gray-400 mb-6">Sign in to create your characters and videos</p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-white">
+      <h1 className="text-4xl font-bold text-gold mb-8">🎨 VoiceVerse Studio</h1>
 
-      <button
-        onClick={() => signIn("google")}
-        className="mb-4 px-6 py-3 bg-gold rounded-lg font-semibold text-black hover:scale-105"
-      >
-        Continue with Google
-      </button>
-
-      <button
-        onClick={() => signIn("apple")}
-        className="px-6 py-3 bg-darkGold rounded-lg font-semibold text-black hover:scale-105"
-      >
-        Continue with Apple
-      </button>
+      {session ? (
+        <>
+          <p className="mb-4">Welcome, {session.user.name}!</p>
+          <div className="flex space-x-4 mb-6">
+            <Link href="/character"><button>Character Generator</button></Link>
+            <Link href="/video"><button>Video Generator</button></Link>
+            <Link href="/script"><button>Script Generator</button></Link>
+          </div>
+          <button onClick={() => signOut()}>Sign Out</button>
+        </>
+      ) : (
+        <>
+          <p className="mb-4">Please sign in to get started</p>
+          <Link href="/auth/signin"><button>Sign In</button></Link>
+        </>
+      )}
     </div>
   );
 }
